@@ -1,0 +1,29 @@
+{
+  "name": "universe-idle",
+  "version": "0.3.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22.19.0"
+  },
+  "scripts": {
+    "dev": "vite --host 127.0.0.1 --mode dev",
+    "build": "node tools/check-content.cjs && node tools/check-vue.cjs --noEmit && vite build --mode prod",
+    "preview": "vite preview --host 127.0.0.1 --mode prod",
+    "test": "vitest run",
+    "check": "node tools/check-content.cjs && node tools/check-vue.cjs --noEmit"
+  },
+  "dependencies": {
+    "@fortawesome/free-solid-svg-icons": "7.3.1",
+    "vue": "3.5.43"
+  },
+  "devDependencies": {
+    "@types/node": "22.20.5",
+    "@typescript/typescript6": "6.0.2",
+    "@vitejs/plugin-vue": "6.0.9",
+    "typescript": "7.0.2",
+    "vite": "8.3.2",
+    "vitest": "5.0.3",
+    "vue-tsc": "3.3.12"
+  }
+}

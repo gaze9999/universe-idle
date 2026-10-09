@@ -1,0 +1,575 @@
+{
+  "schemaVersion": 1,
+  "contentVersion": "ground-v0.3",
+  "buildings": {
+    "habitat": {
+      "cost": {
+        "wood": 30,
+        "stone": 20
+      },
+      "work": 60,
+      "requires": null,
+      "limit": null
+    },
+    "lumberyard": {
+      "cost": {
+        "wood": 40,
+        "stone": 30
+      },
+      "work": 90,
+      "requires": "habitat",
+      "limit": null
+    },
+    "warehouse": {
+      "cost": {
+        "wood": 120,
+        "stone": 80
+      },
+      "work": 180,
+      "requires": "lumberyard",
+      "limit": null
+    },
+    "laboratory": {
+      "cost": {
+        "wood": 160,
+        "stone": 120
+      },
+      "work": 240,
+      "requires": "warehouse",
+      "limit": null
+    },
+    "workshop": {
+      "cost": {
+        "wood": 180,
+        "stone": 140
+      },
+      "work": 240,
+      "requires": "crafting",
+      "limit": null
+    },
+    "monument": {
+      "cost": {
+        "wood": 400,
+        "stone": 500,
+        "planks": 90,
+        "knowledge": 600
+      },
+      "work": 900,
+      "requires": "planning",
+      "limit": 1
+    },
+    "expansion1": {
+      "cost": {
+        "wood": 600,
+        "stone": 600,
+        "planks": 120,
+        "knowledge": 900
+      },
+      "work": 1200,
+      "requires": "monument",
+      "limit": 1
+    },
+    "expansion2": {
+      "cost": {
+        "wood": 600,
+        "stone": 600,
+        "planks": 120,
+        "knowledge": 900
+      },
+      "work": 1200,
+      "requires": "expansion1",
+      "limit": 1
+    },
+    "camp": {
+      "cost": {
+        "wood": 60,
+        "stone": 40
+      },
+      "work": 60,
+      "requires": "workshop",
+      "limit": null
+    },
+    "mineralHabitat": {
+      "cost": {
+        "wood": 90,
+        "stone": 60
+      },
+      "work": 120,
+      "requires": "workshop",
+      "limit": 1
+    },
+    "grove": {
+      "cost": {
+        "wood": 80,
+        "stone": 40
+      },
+      "work": 120,
+      "requires": "forestry",
+      "limit": null
+    },
+    "quarry": {
+      "cost": {
+        "wood": 60,
+        "stone": 100
+      },
+      "work": 150,
+      "requires": "mineralogy",
+      "limit": null
+    },
+    "resonator": {
+      "cost": {
+        "wood": 100,
+        "stone": 120,
+        "knowledge": 50
+      },
+      "work": 180,
+      "requires": "arcana",
+      "limit": null
+    }
+  },
+  "technologies": {
+    "crafting": {
+      "cost": 60,
+      "requires": "laboratory",
+      "conditions": {}
+    },
+    "planning": {
+      "cost": 140,
+      "requires": "workshop",
+      "conditions": {}
+    },
+    "forestry": {
+      "cost": 100,
+      "requires": "laboratory",
+      "conditions": {
+        "branch": "forest",
+        "moisture": 1
+      }
+    },
+    "cultivation": {
+      "cost": 100,
+      "requires": "laboratory",
+      "conditions": {
+        "branch": "symbiosis"
+      }
+    },
+    "mineralogy": {
+      "cost": 120,
+      "requires": "laboratory",
+      "conditions": {
+        "mineral": 1
+      }
+    },
+    "arcana": {
+      "cost": 150,
+      "requires": "crafting",
+      "conditions": {
+        "arcane": 0.45
+      }
+    },
+    "vitality": {
+      "cost": 150,
+      "requires": "cultivation",
+      "conditions": {
+        "branch": "symbiosis",
+        "vitality": 0.45
+      }
+    }
+  },
+  "spawnCosts": {
+    "base": {
+      "wood": 30,
+      "food": 20
+    },
+    "mineral": {
+      "stone": 10,
+      "food": 5
+    }
+  },
+  "texts": {
+    "habitat": [
+      "礦質棲地",
+      "Mineral habitat"
+    ],
+    "habitatDesc": [
+      "礦質棲地 +2, 開放物種分歧",
+      "+2 mineral habitat spaces, unlocks evolution"
+    ],
+    "lumberyard": [
+      "伐木設施",
+      "Lumberyard"
+    ],
+    "lumberyardDesc": [
+      "2 名伐木者產率 +20%, 每隻限一次加成",
+      "+20% output for 2 woodcutters, once per worker"
+    ],
+    "warehouse": [
+      "倉庫",
+      "Warehouse"
+    ],
+    "warehouseDesc": [
+      "所有資源容量 +800",
+      "+800 capacity per resource"
+    ],
+    "laboratory": [
+      "研究站",
+      "Research station"
+    ],
+    "laboratoryDesc": [
+      "研究名額 +2, 基礎產率每隻 0.25 知識 / 秒",
+      "+2 research slots, base 0.25 knowledge / worker / s"
+    ],
+    "workshop": [
+      "工坊",
+      "Workshop"
+    ],
+    "workshopDesc": [
+      "加工名額 +1, 建造佇列 +1, 每木板消耗 5 木頭",
+      "+1 crafting slot, +1 queue slot, 5 wood / plank"
+    ],
+    "monument": [
+      "文明傳承碑",
+      "Legacy monument"
+    ],
+    "monumentDesc": [
+      "開放傳承, 本輪收益 +10",
+      "Unlocks Reset, +10 legacy this run"
+    ],
+    "expansion1": [
+      "聚落擴建 I",
+      "Settlement expansion I"
+    ],
+    "expansion1Desc": [
+      "本輪傳承收益增加 5",
+      "Adds 5 legacy to this run"
+    ],
+    "expansion2": [
+      "聚落擴建 II",
+      "Settlement expansion II"
+    ],
+    "expansion2Desc": [
+      "本輪傳承收益再增加 5",
+      "Adds another 5 legacy to this run"
+    ],
+    "camp": [
+      "營地擴充",
+      "Camp extension"
+    ],
+    "campDesc": [
+      "基礎棲地 +2",
+      "+2 base habitat spaces"
+    ],
+    "mineralHabitat": [
+      "第二礦質棲地",
+      "Second mineral habitat"
+    ],
+    "mineralHabitatDesc": [
+      "礦質棲地 +2",
+      "+2 mineral habitat spaces"
+    ],
+    "grove": [
+      "培育林地",
+      "Cultivated grove"
+    ],
+    "groveDesc": [
+      "伐木產率 +5%",
+      "+5% wood output"
+    ],
+    "quarry": [
+      "共振採石場",
+      "Resonance quarry"
+    ],
+    "quarryDesc": [
+      "礦質物種採石產率 +5%",
+      "+5% mineral-species stone output"
+    ],
+    "resonator": [
+      "魔力共鳴塔",
+      "Arcane resonator"
+    ],
+    "resonatorDesc": [
+      "提升魔力研究增益, 隨星球魔力與物種親和性變動",
+      "Boosts arcane research by planet magic and species affinity"
+    ],
+    "crafting": [
+      "工藝研究",
+      "Crafting research"
+    ],
+    "craftingDesc": [
+      "解鎖工坊與木板產線",
+      "Unlocks the workshop and plank production"
+    ],
+    "planning": [
+      "聚落規劃",
+      "Settlement planning"
+    ],
+    "planningDesc": [
+      "解鎖文明傳承碑, 建造佇列容量 +2",
+      "Unlocks the legacy monument and adds 2 construction queue slots"
+    ],
+    "forestry": [
+      "林地經營",
+      "Woodland management"
+    ],
+    "forestryDesc": [
+      "伐木產率 +10%, 解鎖培育林地",
+      "+10% wood output, unlocks cultivated groves"
+    ],
+    "cultivation": [
+      "生態栽培",
+      "Ecological cultivation"
+    ],
+    "cultivationDesc": [
+      "採集食物產率 +10%, 開放生命調和研究",
+      "+10% food output, unlocks vitality research"
+    ],
+    "mineralogy": [
+      "礦質共振",
+      "Mineral resonance"
+    ],
+    "mineralogyDesc": [
+      "礦質物種採石產率 +15%, 解鎖共振採石場",
+      "+15% mineral-species stone output, unlocks resonance quarries"
+    ],
+    "arcana": [
+      "魔力運用",
+      "Arcane application"
+    ],
+    "arcanaDesc": [
+      "魔法之風提升研究產率, 解鎖魔力共鳴塔",
+      "Magic winds improve research output, unlocks resonators"
+    ],
+    "vitality": [
+      "生命調和",
+      "Vital harmonization"
+    ],
+    "vitalityDesc": [
+      "戶外採集與建造效率 +8%",
+      "+8% outdoor gathering and construction"
+    ],
+    "nativehumanoid": [
+      "類人族",
+      "Humanoid species"
+    ],
+    "nativecarapace": [
+      "甲殼族",
+      "Carapace species"
+    ],
+    "nativecrystalline": [
+      "晶質族",
+      "Crystalline species"
+    ],
+    "nativemycelial": [
+      "菌絲族",
+      "Mycelial species"
+    ],
+    "developmentsettlements": [
+      "聚落社會",
+      "Settlement society"
+    ],
+    "developmentcityStates": [
+      "城邦社會",
+      "City-state society"
+    ],
+    "developmentindustrial": [
+      "工業社會",
+      "Industrial society"
+    ],
+    "wood": [
+      "木頭",
+      "Wood"
+    ],
+    "stone": [
+      "石頭",
+      "Stone"
+    ],
+    "food": [
+      "食物",
+      "Food"
+    ],
+    "planks": [
+      "木板",
+      "Planks"
+    ],
+    "knowledge": [
+      "知識",
+      "Knowledge"
+    ],
+    "base": [
+      "未分化物種",
+      "Undifferentiated species"
+    ],
+    "baseUpkeep": [
+      "每隻消耗 0.05 食物 / 秒, 含閒置",
+      "0.05 food / worker / s, including idle"
+    ],
+    "mineral": [
+      "礦質物種",
+      "Mineral species"
+    ],
+    "mineralUpkeep": [
+      "不消耗食物, 較耐惡劣天氣",
+      "No food upkeep, weather resistant"
+    ],
+    "workwood": [
+      "伐木",
+      "Woodcutting"
+    ],
+    "workstone": [
+      "採石",
+      "Mining"
+    ],
+    "workfood": [
+      "採集食物",
+      "Foraging"
+    ],
+    "workbuild": [
+      "建造",
+      "Building"
+    ],
+    "workcraft": [
+      "加工",
+      "Crafting"
+    ],
+    "workresearch": [
+      "研究",
+      "Research"
+    ],
+    "forest": [
+      "林地型",
+      "Woodland form"
+    ],
+    "forestDesc": [
+      "伐木適性 +50%",
+      "+50% woodcutting aptitude"
+    ],
+    "symbiosis": [
+      "共生型",
+      "Symbiotic form"
+    ],
+    "symbiosisDesc": [
+      "採集食物適性 +50%",
+      "+50% foraging aptitude"
+    ],
+    "achievementsettlement": [
+      "落地生根",
+      "First foundation"
+    ],
+    "achievementsettlementDesc": [
+      "完成第一座礦質棲地",
+      "Complete the first mineral habitat"
+    ],
+    "bonussettlement": [
+      "永久加成: 建造效率 +2%",
+      "Permanent: +2% construction"
+    ],
+    "achievementdiversity": [
+      "各展所長",
+      "Many strengths"
+    ],
+    "achievementdiversityDesc": [
+      "生成礦質物種, 聚落擁有兩種物種",
+      "Generate a mineral species to house two species"
+    ],
+    "bonusdiversity": [
+      "永久加成: 採石產率 +2%",
+      "Permanent: +2% stone output"
+    ],
+    "achievementscholar": [
+      "知識之路",
+      "Path of knowledge"
+    ],
+    "achievementscholarDesc": [
+      "完成第一項研究",
+      "Complete your first research"
+    ],
+    "bonusscholar": [
+      "永久加成: 研究產率 +3%",
+      "Permanent: +3% research output"
+    ],
+    "achievementlegacy": [
+      "文明延續",
+      "Civilization endures"
+    ],
+    "achievementlegacyDesc": [
+      "完成一次傳承並開啟新一輪",
+      "Claim legacy and begin a new cycle"
+    ],
+    "bonuslegacy": [
+      "永久加成: 伐木, 採石與採集食物產率 +2%",
+      "Permanent: +2% wood, stone and food output"
+    ],
+    "achievementendurance": [
+      "風雨同舟",
+      "Weathering the storm"
+    ],
+    "achievementenduranceDesc": [
+      "派遣單位在暴風雨或寒流期間累計工作 300 秒",
+      "Keep workers assigned through storms or cold snaps for 300 seconds"
+    ],
+    "bonusendurance": [
+      "永久加成: 天氣造成的效率損失減少 10%",
+      "Permanent: weather efficiency losses reduced by 10%"
+    ],
+    "regionhome": [
+      "起始平原",
+      "Starting plains"
+    ],
+    "regionupland": [
+      "高地",
+      "Uplands"
+    ],
+    "regioncoast": [
+      "沿岸",
+      "Coast"
+    ],
+    "universestandard": [
+      "常態宇宙",
+      "Standard universe"
+    ],
+    "universedense": [
+      "高重力宇宙",
+      "Dense universe"
+    ],
+    "universevolatile": [
+      "動盪宇宙",
+      "Volatile universe"
+    ],
+    "spring": [
+      "春季",
+      "Spring"
+    ],
+    "summer": [
+      "夏季",
+      "Summer"
+    ],
+    "autumn": [
+      "秋季",
+      "Autumn"
+    ],
+    "winter": [
+      "冬季",
+      "Winter"
+    ],
+    "clear": [
+      "晴朗",
+      "Clear"
+    ],
+    "rain": [
+      "降雨",
+      "Rain"
+    ],
+    "drought": [
+      "乾旱",
+      "Drought"
+    ],
+    "storm": [
+      "暴風雨",
+      "Storm"
+    ],
+    "frost": [
+      "寒流",
+      "Cold snap"
+    ]
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "name": "Universe Idle",
+  "short_name": "Universe Idle",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#10171c",
+  "theme_color": "#111a20",
+  "icons": [{ "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }]
+}
