@@ -11,3 +11,10 @@ coverage/
 .codex/
 local-dev/
 test-results/
+
+# Local browser sessions and private database output
+.playwright-cli/
+*.sqlite
+*.sqlite-*
+*.db
+*.db-*
