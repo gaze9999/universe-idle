@@ -1,0 +1,13 @@
+# Local agent instructions at any directory depth
+AGENTS.md
+AGENTS.override.md
+
+node_modules/
+dist/
+coverage/
+*.local
+.env*
+!.env.example
+.codex/
+local-dev/
+test-results/
