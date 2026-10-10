@@ -136,6 +136,32 @@ describe('Session persistence and ownership', () => {
     now = 250; vi.advanceTimersByTime(250);
     expect(session.getSnapshot().state.elapsed).toBe(.5); expect(session.getSnapshot().timeBank).toEqual({ seconds: 3599.75, enabled: true });
     session.dispatch({ type: 'reset', start: 'base' }); expect(session.getSnapshot().timeBank.seconds).toBe(3599.75);
+    expect(parseSave(storage.getItem(saveKey)!).timeBank.seconds).toBe(3599.75);
+  });
+  it('clears acceleration when abandoning a run and persists it across handoff at normal speed', async () => {
+    const raw = JSON.parse(readyReset()); raw.preferences.paused = false; raw.lastAt = Date.now() - 60000;
+    raw.timeBank = { seconds: 3600, enabled: true }; storage.setItem(saveKey, JSON.stringify(raw));
+    const session = start(); expect(session.getSnapshot().offline).toBe(40);
+    session.dispatch({ type: 'reset', start: 'base', abandon: true });
+    expect(session.getSnapshot().timeBank.seconds).toBe(0); expect(session.getSnapshot().offline).toBe(0);
+    expect(parseSave(storage.getItem(saveKey)!).timeBank.seconds).toBe(0);
+    expect(session.getSnapshot().state.legacy).toMatchObject({ points: 0, resets: 0 });
+    expect(parseSave(storage.getItem(backupKey)!).timeBank.seconds).toBe(3640);
+    now = 250; vi.advanceTimersByTime(250); expect(session.getSnapshot().state.elapsed).toBe(.25);
+    const next = start(); await settle();
+    expect(next.getSnapshot().readOnly).toBe(false); expect(next.getSnapshot().timeBank.seconds).toBe(0);
+    expect(next.getSnapshot().state.elapsed).toBe(.25);
+  });
+  it('keeps acceleration and progress when abandon cannot be saved, then clears both on retry', () => {
+    const raw = JSON.parse(readyReset()); raw.timeBank = { seconds: 3600, enabled: true };
+    const previous = JSON.stringify(raw); storage.setItem(saveKey, previous);
+    const session = start(); const state = structuredClone(session.getSnapshot().state);
+    storage.failPrimary = true; session.dispatch({ type: 'reset', start: 'base', abandon: true });
+    expect(session.getSnapshot().notice).toBe('storageError'); expect(session.getSnapshot().state).toEqual(state);
+    expect(session.getSnapshot().timeBank.seconds).toBe(3600); expect(storage.getItem(saveKey)).toBe(previous);
+    storage.failPrimary = false; session.dispatch({ type: 'reset', start: 'base', abandon: true });
+    expect(session.getSnapshot().state.buildings).toEqual([]); expect(session.getSnapshot().timeBank.seconds).toBe(0);
+    expect(parseSave(storage.getItem(saveKey)!).timeBank.seconds).toBe(0);
   });
   it('discards a compressed import if progress changes or ownership is handed off during decoding', async () => {
     const packed = await compressSave(readyReset()); const primary = start();

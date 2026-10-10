@@ -8,6 +8,7 @@ const support = (sp: typeof species[number], job: typeof props.view.jobs[number]
 const total = (job: typeof props.view.jobs[number]) => species.reduce((n, sp) => n + props.state.assignments[sp][job], 0);
 </script>
 <template>
+  <h2>{{ t('planetSpecies') }}</h2>
   <template v-for="sp in species" :key="sp">
     <section v-if="state.population[sp] > 0" class="panel">
       <div class="section-head">

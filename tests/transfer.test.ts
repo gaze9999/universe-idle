@@ -4,6 +4,17 @@ import { defaultPreferences, encodeSave, parseSave } from '../src/platform/save'
 import { compressSave, importSave } from '../src/platform/transfer';
 
 describe('lossless save transfers', () => {
+  it('keeps Japanese and a selected deity in both formats, migrates absent selections and rejects unknown IDs', async () => {
+    const state = createGame(); state.starGod = 'grove';
+    const json = encodeSave(state, { ...defaultPreferences, language: 'ja' }, 1000);
+    for (const payload of [json, await compressSave(json)]) {
+      const restored = await importSave(payload);
+      expect(restored.preferences.language).toBe('ja'); expect(restored.state.starGod).toBe('grove');
+    }
+    const old = JSON.parse(json); delete old.state.starGod;
+    expect(parseSave(JSON.stringify(old)).state.starGod).toBeNull();
+    old.state.starGod = 'unknown'; expect(() => parseSave(JSON.stringify(old))).toThrow('invalidSave');
+  });
   it('compresses all progress and full-precision decimals and accepts both formats', async () => {
     const state = createGame(); state.resources.wood = .123456789012345; state.achievements.settlement = 1_800_000_123_456;
     const json = encodeSave(state, defaultPreferences, 1_800_000_123_456); const packed = await compressSave(json);

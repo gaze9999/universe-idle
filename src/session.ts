@@ -217,11 +217,13 @@ export class GameSession {
     if (error) { this.publish({ notice: error }); return; }
     if (cmd.type === 'reset') {
       if (this.blockedSave) { this.publish({ notice: 'damagedSave' }); return; }
-      try { writeSave(localStorage, encodeSave(next, this.preferences, this.lastAt, this.timeBank)); }
+      const timeBank = cmd.abandon ? defaultTimeBank() : this.timeBank;
+      try { writeSave(localStorage, encodeSave(next, this.preferences, this.lastAt, timeBank)); }
       catch { this.publish({ notice: 'storageError' }); return; }
       this.state = next;
+      this.timeBank = timeBank;
       this.lastWrite = performance.now();
-      this.publish({ notice: null, savedAt: this.lastAt });
+      this.publish({ notice: null, savedAt: this.lastAt, offline: cmd.abandon ? 0 : this.snapshot.offline });
       return;
     }
     this.state = next;

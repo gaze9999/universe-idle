@@ -11,6 +11,10 @@ export type Branch = typeof branches[number];
 export type Research = typeof researchIds[number];
 export type Cost = Partial<Record<Resource, number>>;
 export type Assignments = Record<Species, Record<Job, number>>;
+export const starGodIds = ['grove', 'peak', 'harvest', 'foundation', 'craft', 'insight', 'frontier', 'earth', 'forge', 'discovery', 'harmony', 'creation'] as const;
+export type StarGod = typeof starGodIds[number];
+/** 星神工作加成為比例, .1 表示 +10%, 只作用於選定星神的本輪 */
+export const starGodDefs: Record<StarGod, Partial<Record<Job, number>>> = gameData.starGods;
 
 /** 地面內容; cost 為首座材料, work 為首座工作量, limit 只限制特殊建築, null 為無上限 */
 export const structureIds = ['habitat', 'lumberyard', 'warehouse', 'laboratory', 'workshop', 'monument', 'expansion1', 'expansion2', 'camp', 'mineralHabitat', 'grove', 'quarry', 'resonator'] as const;
@@ -29,6 +33,7 @@ export const recruit = { cost: { wood: 30, food: 20 }, work: 30 };
 export const spawnCosts: Record<Species, Cost> = gameData.spawnCosts;
 export const achievementIds = ['settlement', 'diversity', 'scholar', 'legacy', 'endurance'] as const;
 export type Achievement = typeof achievementIds[number];
+export const achievementSettings: Record<Achievement, { hidden: boolean }> = gameData.achievementSettings ?? { settlement: { hidden: false }, diversity: { hidden: false }, scholar: { hidden: false }, legacy: { hidden: false }, endurance: { hidden: true } };
 export const contentVersion = 'ground-v0.3';
 export const emptyResources = (): Record<Resource, number> => ({ wood: 0, stone: 0, food: 0, planks: 0, knowledge: 0 });
 export const emptyJobs = (): Record<Job, number> => ({ wood: 0, stone: 0, food: 0, build: 0, craft: 0, research: 0 });

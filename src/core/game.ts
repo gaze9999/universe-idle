@@ -1,5 +1,5 @@
-import { aptitude, buildingConditions, contentVersion, emptyJobs, emptyResources, jobs, queueLimit, recruit, researchDefs, resources, spawnCosts, species, structures } from './content';
-import type { Achievement, Assignments, Branch, Conditions, Cost, Job, Research, Resource, Species, Structure, TaskId } from './content';
+import { aptitude, buildingConditions, contentVersion, emptyJobs, emptyResources, jobs, queueLimit, recruit, researchDefs, resources, spawnCosts, species, starGodDefs, starGodIds, structures } from './content';
+import type { Achievement, Assignments, Branch, Conditions, Cost, Job, Research, Resource, Species, StarGod, Structure, TaskId } from './content';
 import { environment, initialWorld, planet, productionFactor, speciesAptitude, speciesTraits } from './world';
 import type { World } from './world';
 
@@ -11,9 +11,12 @@ export interface GameState {
   contentVersion: string;
   resources: Record<Resource, number>;
   refund: Record<Resource, number>;
+  /** 同一星球的一種物種, base/mineral 為保留既有存檔 ID 的演化分支 */
   population: Record<Species, number>;
   assignments: Assignments;
   branch: Branch;
+  /** 本輪手動選定的星神, null 為尚未選擇, 兩種重開方式均清除 */
+  starGod: StarGod | null;
   buildings: Structure[];
   research: Research[];
   task: { id: TaskId; progress: number; paused: boolean; cost: Cost; work: number } | null;
@@ -22,7 +25,7 @@ export interface GameState {
   elapsed: number;
   world: World;
   achievements: Partial<Record<Achievement, number | null>>;
-  stats: { severeSeconds: number };
+  stats: { severeSeconds: number; starvationSeconds?: number };
   legacy: { points: number; resets: number; tools: number; startChoice: boolean; templates: boolean; discovered: Branch[] };
   template: Assignments | null;
   log: { at: number; key: string; item?: string }[];
@@ -39,11 +42,14 @@ export type Command =
   | { type: 'pauseQueue' }
   | { type: 'claimRefund' }
   | { type: 'branch'; id: Branch }
+  | { type: 'starGod'; id: StarGod }
   | { type: 'research'; id: Research }
   | { type: 'reset'; start: Branch; abandon?: boolean }
   | { type: 'meta'; id: 'tools' | 'startChoice' | 'templates' }
   | { type: 'saveTemplate' | 'applyTemplate' };
 const eps = 1e-8;
+/** 完全缺糧時每 60 世界秒減少一隻需要食物的分支單位, 部分缺口按比例積分 */
+export const starvationInterval = 60;
 export const has = (s: GameState, id: string) => s.buildings.includes(id as Structure) || s.research.includes(id as Research);
 export const count = (s: GameState, id: Structure) => s.buildings.filter(b => b === id).length;
 export const ordered = (s: GameState, id: Structure) => count(s, id) + (s.task?.id === id ? 1 : 0) + s.queue.filter(b => b === id).length;
@@ -65,6 +71,18 @@ export function taskDef(id: TaskId, n = 0): { cost: Cost; work: number } {
 export const canAfford = (s: GameState, cost: Cost) => resources.every(r => s.resources[r] + eps >= (cost[r] ?? 0));
 export const slots = (s: GameState, job: Job) => job === 'craft' ? count(s, 'workshop') : job === 'research' ? 2 * count(s, 'laboratory') : Infinity;
 export const earned = (s: GameState, id: Achievement) => s.achievements[id] !== undefined;
+/** 每個 GameState 僅管理自己的星球物種與派遣, 分支不產生第二種物種 */
+export const planetSpeciesId = (s: GameState) => `planet-${s.world.universe}-${s.world.seed}-origin`;
+export function achievementProgress(s: GameState, id: Achievement): number {
+  if (earned(s, id)) return 1;
+  switch (id) {
+    case 'settlement': return has(s, 'habitat') ? 1 : s.task?.id === 'habitat' ? Math.min(1, s.task.progress / s.task.work) : 0;
+    case 'diversity': return s.population.mineral > 0 ? 1 : 0;
+    case 'scholar': return s.research.length > 0 ? 1 : 0;
+    case 'legacy': return s.legacy.resets > 0 ? 1 : 0;
+    case 'endurance': return Math.min(1, s.stats.severeSeconds / 300);
+  }
+}
 
 export function meets(s: GameState, conditions: Conditions): boolean {
   const p = planet(s.world);
@@ -93,7 +111,7 @@ export function createGame(world: World = initialWorld()): GameState {
     resources: { ...emptyResources(), food: 30 }, refund: emptyResources(),
     population: { base: 6, mineral: 0 },
     assignments: { base: emptyJobs(), mineral: emptyJobs() },
-    branch: 'base', buildings: [], research: [], task: null, queue: [], queuePaused: false, elapsed: 0, world: { ...world }, achievements: {}, stats: { severeSeconds: 0 },
+    branch: 'base', starGod: null, buildings: [], research: [], task: null, queue: [], queuePaused: false, elapsed: 0, world: { ...world }, achievements: {}, stats: { severeSeconds: 0 },
     legacy: { points: 0, resets: 0, tools: 0, startChoice: false, templates: false, discovered: ['base'] },
     template: null, log: [{ at: 0, key: 'arrival' }],
   };
@@ -133,6 +151,7 @@ function startQueued(s: GameState): void {
 /** 即時生產投影與停工狀態由 Core 同一次計算, UI 不另計產率 */
 export function flow(s: GameState) {
   const env = environment(s.world);
+  const blessing = (job: Job) => 1 + (s.starGod ? starGodDefs[s.starGod][job] ?? 0 : 0);
   const efficiency = (sp: Species, job: Job) => {
     const traits = speciesTraits(s.branch, sp);
     const physical = job !== 'research' && job !== 'craft';
@@ -143,12 +162,12 @@ export function flow(s: GameState) {
     if (job === 'food') bonus *= (has(s, 'cultivation') ? 1.1 : 1) * (earned(s, 'legacy') ? 1.02 : 1);
     if (job === 'build') bonus *= earned(s, 'settlement') ? 1.02 : 1;
     if (job === 'research') bonus *= (earned(s, 'scholar') ? 1.03 : 1) * (1 + env.magic * traits.magic * ((has(s, 'arcana') ? .1 : 0) + count(s, 'resonator') * .02));
-    return speciesAptitude(s.world, s.branch, sp, job) * productionFactor(s.world, sp, job, earned(s, 'endurance') ? .1 : 0) * bonus;
+    return speciesAptitude(s.world, s.branch, sp, job) * productionFactor(s.world, sp, job, earned(s, 'endurance') ? .1 : 0) * bonus * blessing(job);
   };
   const foodProduction = s.assignments.base.food * .5 * efficiency('base', 'food');
   const foodDemand = s.population.base * .05;
   const starving = s.resources.food <= eps && foodProduction + eps < foodDemand;
-  const morale = starving ? .5 : 1;
+  const morale = 1;
   const speed = (sp: Species, job: Job) => s.assignments[sp][job] * efficiency(sp, job) * (sp === 'base' && job !== 'food' ? morale : 1);
   let lumberSlots = 2 * count(s, 'lumberyard');
   let woodProduction = 0;
@@ -157,7 +176,7 @@ export function flow(s: GameState) {
     lumberSlots -= boosted;
     woodProduction += (s.assignments[sp].wood + .2 * boosted) * .2 * efficiency(sp, 'wood') * (sp === 'base' ? morale : 1) * (1 + s.legacy.tools * .05);
   }
-  const desiredPlanks = Math.min(slots(s, 'craft'), s.assignments.base.craft) * .05 * morale;
+  const desiredPlanks = Math.min(slots(s, 'craft'), s.assignments.base.craft) * .05 * morale * blessing('craft');
   let plankProduction = s.resources.planks >= capacity(s) - eps ? 0 : desiredPlanks;
   if (s.resources.wood <= eps) plankProduction = Math.min(plankProduction, woodProduction / 5);
   const raw: Record<Resource, number> = {
@@ -172,6 +191,14 @@ export function flow(s: GameState) {
   const buildSpeed = species.reduce((n, sp) => n + speed(sp, 'build'), 0);
   const displayRates = { ...raw, planks: s.resources.wood <= eps ? Math.min(desiredPlanks, woodProduction / 5) : desiredPlanks };
   return { rates, raw, displayRates, starving, foodProduction, foodDemand, plankProduction, desiredPlanks, constructionSpeed: buildSpeed, buildSpeed: s.task && !s.task.paused ? buildSpeed : 0 };
+}
+function starve(s: GameState): void {
+  if (s.population.base <= 0) return;
+  if (idle(s, 'base') === 0) {
+    const job = [...jobs].reverse().find(job => job !== 'food' && s.assignments.base[job] > 0) ?? (s.assignments.base.food > 0 ? 'food' : undefined);
+    if (job) s.assignments.base[job]--;
+  }
+  s.population.base--; s.stats.starvationSeconds = 0;
 }
 function complete(s: GameState, realAt: number | null): void {
   if (!s.task) return;
@@ -204,8 +231,11 @@ export function advance(s: GameState, seconds: number, realStart: number | null 
     if (++iterations > 4096) throw new Error('simulationLimit');
     const env = environment(s.world);
     const severeWork = ['storm', 'frost'].includes(env.weather) && species.some(sp => assigned(s, sp) > 0);
-    const { rates, buildSpeed } = flow(s);
+    const { rates, buildSpeed, starving, foodProduction, foodDemand } = flow(s);
+    const hunger = starving && foodDemand > 0 ? Math.max(0, 1 - foodProduction / foodDemand) : 0;
+    if (!hunger) s.stats.starvationSeconds = 0;
     let dt = Math.min(remaining, env.nextBoundary);
+    if (hunger) dt = Math.min(dt, (starvationInterval - (s.stats.starvationSeconds ?? 0)) / hunger);
     if (severeWork && s.stats.severeSeconds < 300 - eps) dt = Math.min(dt, 300 - s.stats.severeSeconds);
     for (const r of resources) {
       if (rates[r] > eps && s.resources[r] < capacity(s) - eps) dt = Math.min(dt, (capacity(s) - s.resources[r]) / rates[r]);
@@ -219,6 +249,7 @@ export function advance(s: GameState, seconds: number, realStart: number | null 
     }
     if (s.task && buildSpeed > eps) dt = Math.min(dt, Math.max(0, s.task.work - s.task.progress) / buildSpeed);
     if (dt <= eps) {
+      if (hunger && (s.stats.starvationSeconds ?? 0) + eps >= starvationInterval) { starve(s); continue; }
       if (s.task && s.task.progress + eps >= s.task.work) { complete(s, realAt()); continue; }
       throw new Error('simulationBoundary');
     }
@@ -230,7 +261,9 @@ export function advance(s: GameState, seconds: number, realStart: number | null 
     s.elapsed += dt;
     s.world.age += dt;
     if (severeWork) s.stats.severeSeconds += dt;
+    if (hunger) s.stats.starvationSeconds = (s.stats.starvationSeconds ?? 0) + hunger * dt;
     remaining -= dt;
+    if (hunger && (s.stats.starvationSeconds ?? 0) + eps >= starvationInterval) starve(s);
     if (s.task && s.task.progress + eps >= s.task.work) complete(s, realAt());
     checkAchievements(s, realAt());
     startQueued(s);
@@ -238,6 +271,13 @@ export function advance(s: GameState, seconds: number, realStart: number | null 
   checkAchievements(s, realAt());
 }
 export function execute(s: GameState, cmd: Command, realAt: number | null = null): string | null {
+  if (cmd.type === 'starGod') {
+    if (!starGodIds.includes(cmd.id)) return 'invalidStarGod';
+    if (s.starGod !== null) return 'starGodLocked';
+    s.starGod = cmd.id;
+    event(s, 'starGodChosen', 'starGod' + cmd.id);
+    return null;
+  }
   switch (cmd.type) {
     case 'spawn': {
       const reason = spawnReason(s, cmd.sp);
@@ -346,7 +386,7 @@ export function execute(s: GameState, cmd: Command, realAt: number | null = null
       next.branch = cmd.start;
       next.template = structuredClone(s.template);
       next.achievements = { ...s.achievements };
-      next.stats = { ...s.stats };
+      next.stats = { ...s.stats, starvationSeconds: 0 };
       next.log = [{ at: 0, key: earned ? 'resetDone' : 'arrival' }];
       Object.assign(s, next);
       checkAchievements(s, realAt);

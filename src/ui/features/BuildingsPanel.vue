@@ -33,7 +33,7 @@ function actionHint(id: typeof props.view.tasks[number]): string {
         <small>{{ definition(id).work }} {{ t('workUnit') }}<template v-if="ordered(state, id) > count(state, id)"> / {{ t('plannedCount', { n: ordered(state, id) - count(state, id) }) }}</template></small>
       </template>
       <template #action>
-        <button v-if="!buildingLimitReached(state, id)" :class="queueReason(state, id) ? 'secondary' : 'primary'" :disabled="!!queueReason(state, id)" :title="actionHint(id)" :aria-label="t('build') + ' ' + t(id) + ', ' + actionHint(id)" @click="send({ type: 'build', id })">{{ t('build') }}</button>
+        <button v-if="!buildingLimitReached(state, id)" :class="queueReason(state, id) ? 'secondary' : 'primary'" :disabled="!!queueReason(state, id)" :aria-label="t('build') + ' ' + t(id) + ', ' + actionHint(id)" @click="send({ type: 'build', id })">{{ t('build') }}</button>
       </template>
     </ActionCard>
   </div>

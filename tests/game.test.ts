@@ -109,9 +109,9 @@ describe('event boundaries and recovery', () => {
     s.resources.wood = 80; s.resources.stone = 60; expect(execute(s, { type: 'build', id: 'lumberyard' })).toBeNull();
     const split = structuredClone(s); advance(s, 24 * 60 * 60); for (let i = 0; i < 1440; i++) advance(split, 60);
     for (const r of resources) expect(split.resources[r]).toBeCloseTo(s.resources[r], 7);
-    expect(split.buildings).toEqual(s.buildings); expect(split.population).toEqual(s.population); expect(flow(s).starving).toBe(true);
-    expect(execute(s, { type: 'assign', sp: 'base', job: 'wood', delta: -1 })).toBeNull(); expect(execute(s, { type: 'assign', sp: 'base', job: 'food', delta: 1 })).toBeNull();
-    const rate = flow(s).rates.food; const wasStarving = flow(s).starving; advance(s, 10); expect(s.resources.food).toBeCloseTo(Math.max(0, rate * 10), 8); expect(wasStarving).toBe(rate <= 0);
+    expect(split.buildings).toEqual(s.buildings); expect(split.population).toEqual(s.population); expect(s.population.base).toBe(0); expect(s.population.mineral).toBe(2);
+    expect(flow(s).starving).toBe(false); expect(execute(s, { type: 'assign', sp: 'base', job: 'food', delta: 1 })).toBe('workers');
+    expect(parseSave(encodeSave(s, defaultPreferences, 1000)).state).toEqual(s);
   });
   it('crafting uses only available incoming wood and stops at capacity without consuming inputs', () => {
     const s = fullRun('forest'); s.branch = 'base'; s.resources.wood = 0; s.resources.planks = 0;
