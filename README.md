@@ -1,6 +1,6 @@
 # Universe Idle
 
-一款以宇宙探索為方向的純文字 Idle / Incremental 遊戲, 支援繁體中文與英文
+一款以宇宙探索為方向的純文字 Idle / Incremental 遊戲, 支援繁體中文、英文與日文
 
 [開始遊戲](https://gaze9999.github.io/universe-idle/)
 
@@ -13,4 +13,4 @@
 
 可在桌面與手機瀏覽器遊玩, 存檔保存在目前瀏覽器, 支援匯出與匯入備份
 
-圖示使用 [Font Awesome Free](public/fontawesome-license.txt)
+圖示與星神紋章採用原創單色 SVG

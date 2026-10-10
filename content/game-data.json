@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "contentVersion": "ground-v0.3",
   "buildings": {
     "habitat": {
@@ -186,390 +186,667 @@
       "food": 5
     }
   },
+  "starGods": {
+    "grove": {
+      "wood": 0.1
+    },
+    "peak": {
+      "stone": 0.1
+    },
+    "harvest": {
+      "food": 0.1
+    },
+    "foundation": {
+      "build": 0.1
+    },
+    "craft": {
+      "craft": 0.1
+    },
+    "insight": {
+      "research": 0.1
+    },
+    "frontier": {
+      "wood": 0.06,
+      "build": 0.06
+    },
+    "earth": {
+      "stone": 0.06,
+      "food": 0.06
+    },
+    "forge": {
+      "stone": 0.06,
+      "craft": 0.06
+    },
+    "discovery": {
+      "wood": 0.06,
+      "research": 0.06
+    },
+    "harmony": {
+      "food": 0.06,
+      "build": 0.06
+    },
+    "creation": {
+      "craft": 0.06,
+      "research": 0.06
+    }
+  },
+  "achievementSettings": {
+    "settlement": {
+      "hidden": false
+    },
+    "diversity": {
+      "hidden": false
+    },
+    "scholar": {
+      "hidden": false
+    },
+    "legacy": {
+      "hidden": false
+    },
+    "endurance": {
+      "hidden": true
+    }
+  },
   "texts": {
     "habitat": [
       "礦質棲地",
-      "Mineral habitat"
+      "Mineral habitat",
+      "鉱物分岐の居住地"
     ],
     "habitatDesc": [
       "礦質棲地 +2, 開放物種分歧",
-      "+2 mineral habitat spaces, unlocks evolution"
+      "+2 mineral habitat spaces, unlocks evolution",
+      "鉱物分岐の居住枠 +2、種族進化を解放"
     ],
     "lumberyard": [
       "伐木設施",
-      "Lumberyard"
+      "Lumberyard",
+      "伐採施設"
     ],
     "lumberyardDesc": [
       "2 名伐木者產率 +20%, 每隻限一次加成",
-      "+20% output for 2 woodcutters, once per worker"
+      "+20% output for 2 woodcutters, once per worker",
+      "伐採者2体の生産量 +20%、各ユニットに1回まで"
     ],
     "warehouse": [
       "倉庫",
-      "Warehouse"
+      "Warehouse",
+      "倉庫"
     ],
     "warehouseDesc": [
       "所有資源容量 +800",
-      "+800 capacity per resource"
+      "+800 capacity per resource",
+      "全資源の容量 +800"
     ],
     "laboratory": [
       "研究站",
-      "Research station"
+      "Research station",
+      "研究所"
     ],
     "laboratoryDesc": [
       "研究名額 +2, 基礎產率每隻 0.25 知識 / 秒",
-      "+2 research slots, base 0.25 knowledge / worker / s"
+      "+2 research slots, base 0.25 knowledge / worker / s",
+      "研究枠 +2、基本生産量は1体あたり毎秒0.25知識"
     ],
     "workshop": [
       "工坊",
-      "Workshop"
+      "Workshop",
+      "工房"
     ],
     "workshopDesc": [
       "加工名額 +1, 建造佇列 +1, 每木板消耗 5 木頭",
-      "+1 crafting slot, +1 queue slot, 5 wood / plank"
+      "+1 crafting slot, +1 queue slot, 5 wood / plank",
+      "加工枠 +1、建設キュー +1、板材1枚に木材5を消費"
     ],
     "monument": [
       "文明傳承碑",
-      "Legacy monument"
+      "Legacy monument",
+      "文明継承碑"
     ],
     "monumentDesc": [
       "開放傳承, 本輪收益 +10",
-      "Unlocks Reset, +10 legacy this run"
+      "Unlocks Reset, +10 legacy this run",
+      "継承を解放、今回の報酬 +10"
     ],
     "expansion1": [
       "聚落擴建 I",
-      "Settlement expansion I"
+      "Settlement expansion I",
+      "集落拡張 I"
     ],
     "expansion1Desc": [
       "本輪傳承收益增加 5",
-      "Adds 5 legacy to this run"
+      "Adds 5 legacy to this run",
+      "今回の継承報酬 +5"
     ],
     "expansion2": [
       "聚落擴建 II",
-      "Settlement expansion II"
+      "Settlement expansion II",
+      "集落拡張 II"
     ],
     "expansion2Desc": [
       "本輪傳承收益再增加 5",
-      "Adds another 5 legacy to this run"
+      "Adds another 5 legacy to this run",
+      "今回の継承報酬をさらに +5"
     ],
     "camp": [
       "營地擴充",
-      "Camp extension"
+      "Camp extension",
+      "拠点拡張"
     ],
     "campDesc": [
       "基礎棲地 +2",
-      "+2 base habitat spaces"
+      "+2 base habitat spaces",
+      "基本種族の居住枠 +2"
     ],
     "mineralHabitat": [
       "第二礦質棲地",
-      "Second mineral habitat"
+      "Second mineral habitat",
+      "第2鉱物居住地"
     ],
     "mineralHabitatDesc": [
       "礦質棲地 +2",
-      "+2 mineral habitat spaces"
+      "+2 mineral habitat spaces",
+      "鉱物分岐の居住枠 +2"
     ],
     "grove": [
       "培育林地",
-      "Cultivated grove"
+      "Cultivated grove",
+      "育成林"
     ],
     "groveDesc": [
       "伐木產率 +5%",
-      "+5% wood output"
+      "+5% wood output",
+      "伐採生産量 +5%"
     ],
     "quarry": [
       "共振採石場",
-      "Resonance quarry"
+      "Resonance quarry",
+      "共振採石場"
     ],
     "quarryDesc": [
-      "礦質物種採石產率 +5%",
-      "+5% mineral-species stone output"
+      "礦質分支採石產率 +5%",
+      "+5% mineral-branch stone output",
+      "鉱物分岐の採石生産量 +5%"
     ],
     "resonator": [
       "魔力共鳴塔",
-      "Arcane resonator"
+      "Arcane resonator",
+      "魔力共鳴塔"
     ],
     "resonatorDesc": [
       "提升魔力研究增益, 隨星球魔力與物種親和性變動",
-      "Boosts arcane research by planet magic and species affinity"
+      "Boosts arcane research by planet magic and species affinity",
+      "研究への魔力ボーナスを強化、惑星の魔力と種族の親和性に応じて変化"
     ],
     "crafting": [
       "工藝研究",
-      "Crafting research"
+      "Crafting research",
+      "工芸研究"
     ],
     "craftingDesc": [
       "解鎖工坊與木板產線",
-      "Unlocks the workshop and plank production"
+      "Unlocks the workshop and plank production",
+      "工房と板材生産を解放"
     ],
     "planning": [
       "聚落規劃",
-      "Settlement planning"
+      "Settlement planning",
+      "集落計画"
     ],
     "planningDesc": [
       "解鎖文明傳承碑, 建造佇列容量 +2",
-      "Unlocks the legacy monument and adds 2 construction queue slots"
+      "Unlocks the legacy monument and adds 2 construction queue slots",
+      "文明継承碑を解放、建設キューの容量 +2"
     ],
     "forestry": [
       "林地經營",
-      "Woodland management"
+      "Woodland management",
+      "森林管理"
     ],
     "forestryDesc": [
       "伐木產率 +10%, 解鎖培育林地",
-      "+10% wood output, unlocks cultivated groves"
+      "+10% wood output, unlocks cultivated groves",
+      "伐採生産量 +10%、育成林を解放"
     ],
     "cultivation": [
       "生態栽培",
-      "Ecological cultivation"
+      "Ecological cultivation",
+      "生態栽培"
     ],
     "cultivationDesc": [
       "採集食物產率 +10%, 開放生命調和研究",
-      "+10% food output, unlocks vitality research"
+      "+10% food output, unlocks vitality research",
+      "食料採集の生産量 +10%、生命調和の研究を解放"
     ],
     "mineralogy": [
       "礦質共振",
-      "Mineral resonance"
+      "Mineral resonance",
+      "鉱物共振"
     ],
     "mineralogyDesc": [
-      "礦質物種採石產率 +15%, 解鎖共振採石場",
-      "+15% mineral-species stone output, unlocks resonance quarries"
+      "礦質分支採石產率 +15%, 解鎖共振採石場",
+      "+15% mineral-branch stone output, unlocks resonance quarries",
+      "鉱物分岐の採石生産量 +15%、共振採石場を解放"
     ],
     "arcana": [
       "魔力運用",
-      "Arcane application"
+      "Arcane application",
+      "魔力利用"
     ],
     "arcanaDesc": [
       "魔法之風提升研究產率, 解鎖魔力共鳴塔",
-      "Magic winds improve research output, unlocks resonators"
+      "Magic winds improve research output, unlocks resonators",
+      "魔力の風で研究生産量を向上、魔力共鳴塔を解放"
     ],
     "vitality": [
       "生命調和",
-      "Vital harmonization"
+      "Vital harmonization",
+      "生命調和"
     ],
     "vitalityDesc": [
       "戶外採集與建造效率 +8%",
-      "+8% outdoor gathering and construction"
+      "+8% outdoor gathering and construction",
+      "屋外採集と建設の効率 +8%"
     ],
     "nativehumanoid": [
       "類人族",
-      "Humanoid species"
+      "Humanoid species",
+      "人型種族"
     ],
     "nativecarapace": [
       "甲殼族",
-      "Carapace species"
+      "Carapace species",
+      "甲殻種族"
     ],
     "nativecrystalline": [
       "晶質族",
-      "Crystalline species"
+      "Crystalline species",
+      "結晶種族"
     ],
     "nativemycelial": [
       "菌絲族",
-      "Mycelial species"
+      "Mycelial species",
+      "菌糸種族"
     ],
     "developmentsettlements": [
       "聚落社會",
-      "Settlement society"
+      "Settlement society",
+      "集落社会"
     ],
     "developmentcityStates": [
       "城邦社會",
-      "City-state society"
+      "City-state society",
+      "都市国家社会"
     ],
     "developmentindustrial": [
       "工業社會",
-      "Industrial society"
+      "Industrial society",
+      "産業社会"
     ],
     "wood": [
       "木頭",
-      "Wood"
+      "Wood",
+      "木材"
     ],
     "stone": [
       "石頭",
-      "Stone"
+      "Stone",
+      "石材"
     ],
     "food": [
       "食物",
-      "Food"
+      "Food",
+      "食料"
     ],
     "planks": [
       "木板",
-      "Planks"
+      "Planks",
+      "板材"
     ],
     "knowledge": [
       "知識",
-      "Knowledge"
+      "Knowledge",
+      "知識"
     ],
     "base": [
-      "未分化物種",
-      "Undifferentiated species"
+      "未分化分支",
+      "Undifferentiated branch",
+      "未分化分岐"
     ],
     "baseUpkeep": [
       "每隻消耗 0.05 食物 / 秒, 含閒置",
-      "0.05 food / worker / s, including idle"
+      "0.05 food / worker / s, including idle",
+      "待機中も含め、1体あたり毎秒0.05食料を消費"
     ],
     "mineral": [
-      "礦質物種",
-      "Mineral species"
+      "礦質分支",
+      "Mineral branch",
+      "鉱物分岐"
     ],
     "mineralUpkeep": [
       "不消耗食物, 較耐惡劣天氣",
-      "No food upkeep, weather resistant"
+      "No food upkeep, weather resistant",
+      "食料消費なし、悪天候に強い"
     ],
     "workwood": [
       "伐木",
-      "Woodcutting"
+      "Woodcutting",
+      "伐採"
     ],
     "workstone": [
       "採石",
-      "Mining"
+      "Mining",
+      "採石"
     ],
     "workfood": [
       "採集食物",
-      "Foraging"
+      "Foraging",
+      "食料採集"
     ],
     "workbuild": [
       "建造",
-      "Building"
+      "Building",
+      "建設"
     ],
     "workcraft": [
       "加工",
-      "Crafting"
+      "Crafting",
+      "加工"
     ],
     "workresearch": [
       "研究",
-      "Research"
+      "Research",
+      "研究"
     ],
     "forest": [
       "林地型",
-      "Woodland form"
+      "Woodland form",
+      "森林型"
     ],
     "forestDesc": [
       "伐木適性 +50%",
-      "+50% woodcutting aptitude"
+      "+50% woodcutting aptitude",
+      "伐採適性 +50%"
     ],
     "symbiosis": [
       "共生型",
-      "Symbiotic form"
+      "Symbiotic form",
+      "共生型"
     ],
     "symbiosisDesc": [
       "採集食物適性 +50%",
-      "+50% foraging aptitude"
+      "+50% foraging aptitude",
+      "食料採集適性 +50%"
     ],
     "achievementsettlement": [
       "落地生根",
-      "First foundation"
+      "First foundation",
+      "最初の礎"
     ],
     "achievementsettlementDesc": [
       "完成第一座礦質棲地",
-      "Complete the first mineral habitat"
+      "Complete the first mineral habitat",
+      "最初の鉱物分岐の居住地を完成"
     ],
     "bonussettlement": [
       "永久加成: 建造效率 +2%",
-      "Permanent: +2% construction"
+      "Permanent: +2% construction",
+      "永続: 建設効率 +2%"
     ],
     "achievementdiversity": [
       "各展所長",
-      "Many strengths"
+      "Many strengths",
+      "多様な才能"
     ],
     "achievementdiversityDesc": [
-      "生成礦質物種, 聚落擁有兩種物種",
-      "Generate a mineral species to house two species"
+      "生成礦質分支, 聚落擁有兩種分支",
+      "Generate a mineral branch to house two branches",
+      "鉱物分岐を生成し、集落に2つの分岐を揃える"
     ],
     "bonusdiversity": [
       "永久加成: 採石產率 +2%",
-      "Permanent: +2% stone output"
+      "Permanent: +2% stone output",
+      "永続: 採石生産量 +2%"
     ],
     "achievementscholar": [
       "知識之路",
-      "Path of knowledge"
+      "Path of knowledge",
+      "知識への道"
     ],
     "achievementscholarDesc": [
       "完成第一項研究",
-      "Complete your first research"
+      "Complete your first research",
+      "最初の研究を完了"
     ],
     "bonusscholar": [
       "永久加成: 研究產率 +3%",
-      "Permanent: +3% research output"
+      "Permanent: +3% research output",
+      "永続: 研究生産量 +3%"
     ],
     "achievementlegacy": [
       "文明延續",
-      "Civilization endures"
+      "Civilization endures",
+      "文明の継続"
     ],
     "achievementlegacyDesc": [
       "完成一次傳承並開啟新一輪",
-      "Claim legacy and begin a new cycle"
+      "Claim legacy and begin a new cycle",
+      "継承を受け取り、次の周回を開始"
     ],
     "bonuslegacy": [
       "永久加成: 伐木, 採石與採集食物產率 +2%",
-      "Permanent: +2% wood, stone and food output"
+      "Permanent: +2% wood, stone and food output",
+      "永続: 伐採、採石、食料採集の生産量 +2%"
     ],
     "achievementendurance": [
       "風雨同舟",
-      "Weathering the storm"
+      "Weathering the storm",
+      "嵐を越えて"
     ],
     "achievementenduranceDesc": [
       "派遣單位在暴風雨或寒流期間累計工作 300 秒",
-      "Keep workers assigned through storms or cold snaps for 300 seconds"
+      "Keep workers assigned through storms or cold snaps for 300 seconds",
+      "嵐または寒波の間に、割り当てたユニットが累計300秒作業する"
     ],
     "bonusendurance": [
       "永久加成: 天氣造成的效率損失減少 10%",
-      "Permanent: weather efficiency losses reduced by 10%"
+      "Permanent: weather efficiency losses reduced by 10%",
+      "永続: 天候による効率低下を10%軽減"
     ],
     "regionhome": [
       "起始平原",
-      "Starting plains"
+      "Starting plains",
+      "初期平原"
     ],
     "regionupland": [
       "高地",
-      "Uplands"
+      "Uplands",
+      "高地"
     ],
     "regioncoast": [
       "沿岸",
-      "Coast"
+      "Coast",
+      "沿岸"
     ],
     "universestandard": [
       "常態宇宙",
-      "Standard universe"
+      "Standard universe",
+      "標準宇宙"
     ],
     "universedense": [
       "高重力宇宙",
-      "Dense universe"
+      "Dense universe",
+      "高重力宇宙"
     ],
     "universevolatile": [
       "動盪宇宙",
-      "Volatile universe"
+      "Volatile universe",
+      "不安定宇宙"
     ],
     "spring": [
       "春季",
-      "Spring"
+      "Spring",
+      "春"
     ],
     "summer": [
       "夏季",
-      "Summer"
+      "Summer",
+      "夏"
     ],
     "autumn": [
       "秋季",
-      "Autumn"
+      "Autumn",
+      "秋"
     ],
     "winter": [
       "冬季",
-      "Winter"
+      "Winter",
+      "冬"
     ],
     "clear": [
       "晴朗",
-      "Clear"
+      "Clear",
+      "晴れ"
     ],
     "rain": [
       "降雨",
-      "Rain"
+      "Rain",
+      "雨"
     ],
     "drought": [
       "乾旱",
-      "Drought"
+      "Drought",
+      "干ばつ"
     ],
     "storm": [
       "暴風雨",
-      "Storm"
+      "Storm",
+      "嵐"
     ],
     "frost": [
       "寒流",
-      "Cold snap"
+      "Cold snap",
+      "寒波"
+    ],
+    "starGodgrove": [
+      "翠林星神",
+      "Grove Deity",
+      "翠林の星神"
+    ],
+    "starGodgroveDesc": [
+      "伐木 +10%",
+      "Woodcutting +10%",
+      "伐採 +10%"
+    ],
+    "starGodpeak": [
+      "岩峰星神",
+      "Peak Deity",
+      "岩峰の星神"
+    ],
+    "starGodpeakDesc": [
+      "採石 +10%",
+      "Mining +10%",
+      "採石 +10%"
+    ],
+    "starGodharvest": [
+      "豐穰星神",
+      "Harvest Deity",
+      "豊穣の星神"
+    ],
+    "starGodharvestDesc": [
+      "採集食物 +10%",
+      "Foraging +10%",
+      "食料採集 +10%"
+    ],
+    "starGodfoundation": [
+      "築城星神",
+      "Foundation Deity",
+      "築城の星神"
+    ],
+    "starGodfoundationDesc": [
+      "建造 +10%",
+      "Building +10%",
+      "建設 +10%"
+    ],
+    "starGodcraft": [
+      "匠心星神",
+      "Craft Deity",
+      "匠の星神"
+    ],
+    "starGodcraftDesc": [
+      "加工 +10%",
+      "Crafting +10%",
+      "加工 +10%"
+    ],
+    "starGodinsight": [
+      "啟智星神",
+      "Insight Deity",
+      "叡智の星神"
+    ],
+    "starGodinsightDesc": [
+      "研究 +10%",
+      "Research +10%",
+      "研究 +10%"
+    ],
+    "starGodfrontier": [
+      "拓荒星神",
+      "Frontier Deity",
+      "開拓の星神"
+    ],
+    "starGodfrontierDesc": [
+      "伐木 +6%, 建造 +6%",
+      "Woodcutting +6%, Building +6%",
+      "伐採 +6%、建設 +6%"
+    ],
+    "starGodearth": [
+      "沃土星神",
+      "Earth Deity",
+      "沃土の星神"
+    ],
+    "starGodearthDesc": [
+      "採石 +6%, 採集食物 +6%",
+      "Mining +6%, Foraging +6%",
+      "採石 +6%、食料採集 +6%"
+    ],
+    "starGodforge": [
+      "鑄造星神",
+      "Forge Deity",
+      "鋳造の星神"
+    ],
+    "starGodforgeDesc": [
+      "採石 +6%, 加工 +6%",
+      "Mining +6%, Crafting +6%",
+      "採石 +6%、加工 +6%"
+    ],
+    "starGoddiscovery": [
+      "探知星神",
+      "Discovery Deity",
+      "探求の星神"
+    ],
+    "starGoddiscoveryDesc": [
+      "伐木 +6%, 研究 +6%",
+      "Woodcutting +6%, Research +6%",
+      "伐採 +6%、研究 +6%"
+    ],
+    "starGodharmony": [
+      "調和星神",
+      "Harmony Deity",
+      "調和の星神"
+    ],
+    "starGodharmonyDesc": [
+      "採集食物 +6%, 建造 +6%",
+      "Foraging +6%, Building +6%",
+      "食料採集 +6%、建設 +6%"
+    ],
+    "starGodcreation": [
+      "創生星神",
+      "Creation Deity",
+      "創生の星神"
+    ],
+    "starGodcreationDesc": [
+      "加工 +6%, 研究 +6%",
+      "Crafting +6%, Research +6%",
+      "加工 +6%、研究 +6%"
     ]
   }
 }

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { onBeforeUnmount, onMounted, ref } from 'vue';
-import { faXmark } from '@fortawesome/free-solid-svg-icons';
+import { close as faXmark } from '../icons';
 import GameIcon from '../atoms/GameIcon.vue';
 defineProps<{ title: string; closeLabel: string; titleId: string; }>();
 const emit = defineEmits<{ close: []; }>();

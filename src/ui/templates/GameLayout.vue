@@ -1,6 +1,7 @@
+<script setup lang="ts">defineProps<{ planet: boolean; }>();</script>
 <template>
-  <div class="game-layout">
-    <aside class="resource-sidebar">
+  <div class="game-layout" :class="{ 'global-layout': !planet }">
+    <aside v-if="planet" class="resource-sidebar">
       <slot name="resources" />
     </aside>
     <div class="game-content">

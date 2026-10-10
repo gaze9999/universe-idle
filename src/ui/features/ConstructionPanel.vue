@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { faPause, faPlay, faXmark } from '@fortawesome/free-solid-svg-icons';
+import { pause as faPause, play as faPlay, close as faXmark } from '../icons';
 import { count, queueCapacity, taskDef } from '../../core/game';
 import type { flow } from '../../core/game';
 import { duration } from '../../i18n';
@@ -16,12 +16,11 @@ const definition = (index: number) => { const id = props.state.queue[index]; ret
     <div class="section-head">
       <h2>{{ t('buildQueue') }}</h2>
       <div class="button-row">
-        <span class="badge" :title="t('queueCapacityHelp')">{{ state.queue.length + (state.task ? 1 : 0) }} / {{ queueCapacity(state) }}</span>
+        <span class="badge">{{ state.queue.length + (state.task ? 1 : 0) }} / {{ queueCapacity(state) }}</span>
         <button
           v-if="state.queue.length"
           class="queue-control"
           :disabled="disabled"
-          :title="t(state.queuePaused ? 'resumeQueue' : 'pauseQueue')"
           :aria-label="t(state.queuePaused ? 'resumeQueue' : 'pauseQueue')"
           :aria-pressed="state.queuePaused"
           @click="send({ type: 'pauseQueue' })"
@@ -36,18 +35,17 @@ const definition = (index: number) => { const id = props.state.queue[index]; ret
       <li
         v-if="state.task"
         class="active-construction"
-        :title="t(state.task.paused || paused ? 'paused' : !production.buildSpeed ? 'noBuilders' : 'activeBuild')"
+        :aria-label="t(state.task.paused || paused ? 'paused' : !production.buildSpeed ? 'noBuilders' : 'activeBuild')"
       >
         <div class="queue-row">
           <div class="queue-project">
             <strong>{{ t(state.task.id) }}</strong>
-            <time :title="t('queueTimeHelp')">{{ time(state.task.work - state.task.progress) }}</time>
+            <time>{{ time(state.task.work - state.task.progress) }}</time>
           </div>
           <div class="queue-actions">
             <button
               class="queue-control"
               :disabled="disabled"
-              :title="t(state.task.paused ? 'resume' : 'pause')"
               :aria-label="t(state.task.paused ? 'resume' : 'pause')"
               :aria-pressed="state.task.paused"
               @click="send({ type: 'pauseBuild' })"
@@ -57,7 +55,6 @@ const definition = (index: number) => { const id = props.state.queue[index]; ret
             <button
               class="queue-control danger"
               :disabled="disabled"
-              :title="t('cancel')"
               :aria-label="t('cancel')"
               @click="send({ type: 'cancelBuild' })"
             >
@@ -78,14 +75,13 @@ const definition = (index: number) => { const id = props.state.queue[index]; ret
             v-bind="bind(index)"
           >
             <strong>{{ t(id) }}</strong>
-            <time :title="t('queueTimeHelp')">{{ time(definition(index).work) }}</time>
+            <time>{{ time(definition(index).work) }}</time>
           </button>
           <div class="queue-actions">
             <button
               class="queue-control danger"
               :disabled="disabled"
               :aria-label="t('queueRemove', { item: t(id) })"
-              :title="t('queueRemove', { item: t(id) })"
               @click="send({ type: 'removeQueued', index })"
             >
               <GameIcon :icon="faXmark" />

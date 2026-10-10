@@ -3,17 +3,20 @@ const technologyIds = ['crafting', 'planning', 'forestry', 'cultivation', 'miner
 const civilizationIds = ['nativehumanoid', 'nativecarapace', 'nativecrystalline', 'nativemycelial', 'developmentsettlements', 'developmentcityStates', 'developmentindustrial'];
 const resources = ['wood', 'stone', 'food', 'planks', 'knowledge'];
 const specialIds = ['monument', 'expansion1', 'expansion2', 'mineralHabitat'];
+const starGodIds = ['grove', 'peak', 'harvest', 'foundation', 'craft', 'insight', 'frontier', 'earth', 'forge', 'discovery', 'harmony', 'creation'];
 const catalogGroups = {
   buildings: buildingIds, technologies: technologyIds, civilizations: civilizationIds,
   resources, playerSpecies: ['base', 'mineral'], jobs: ['wood', 'stone', 'food', 'build', 'craft', 'research'],
   branches: ['forest', 'symbiosis'], achievements: ['settlement', 'diversity', 'scholar', 'legacy', 'endurance'],
   regions: ['home', 'upland', 'coast'], universes: ['standard', 'dense', 'volatile'],
   seasons: ['spring', 'summer', 'autumn', 'winter'], weather: ['clear', 'rain', 'drought', 'storm', 'frost'],
+  starGods: starGodIds,
 };
 function labelKeys(group, id) {
   if (['buildings', 'technologies', 'branches'].includes(group)) return { name: id, description: id + 'Desc' };
   if (group === 'playerSpecies') return { name: id, description: id + 'Upkeep' };
   if (group === 'achievements') return { name: 'achievement' + id, description: 'achievement' + id + 'Desc', bonus: 'bonus' + id };
+  if (group === 'starGods') return { name: 'starGod' + id, description: 'starGod' + id + 'Desc' };
   const prefix = { jobs: 'work', regions: 'region', universes: 'universe' }[group] ?? '';
   return { name: prefix + id };
 }
@@ -38,10 +41,25 @@ function conditions(value, label) {
   }
 }
 function validateRuntime(value) {
-  keys(value, ['schemaVersion', 'contentVersion', 'buildings', 'technologies', 'spawnCosts', 'texts'], '遊戲資料', true);
-  if (value.schemaVersion !== 1 || value.contentVersion !== 'ground-v0.3') fail('不支援此內容版本, 請先加入版本與遷移');
+  const required = ['schemaVersion', 'contentVersion', 'buildings', 'technologies', 'spawnCosts', 'starGods', 'texts'];
+  keys(value, [...required, 'achievementSettings'], '遊戲資料');
+  if (required.some(key => !Object.hasOwn(value, key))) fail('遊戲資料: 缺少必要欄位');
+  if (value.achievementSettings !== undefined) {
+    keys(value.achievementSettings, catalogGroups.achievements, '成就設定', true);
+    for (const [id, setting] of Object.entries(value.achievementSettings)) {
+      keys(setting, ['hidden'], id, true);
+      if (typeof setting.hidden !== 'boolean') fail(`${id}: 隱藏設定不合法`);
+    }
+  }
+  if (value.schemaVersion !== 2 || value.contentVersion !== 'ground-v0.3') fail('不支援此內容版本, 請先加入版本與遷移');
   keys(value.buildings, buildingIds, '建築', true); keys(value.technologies, technologyIds, '科技', true); keys(value.texts, textIds, '文案', true);
   keys(value.spawnCosts, catalogGroups.playerSpecies, '物種生成成本', true);
+  keys(value.starGods, starGodIds, '星神', true);
+  for (const [id, bonuses] of Object.entries(value.starGods)) {
+    keys(bonuses, catalogGroups.jobs, `${id}.bonuses`);
+    if (!Object.keys(bonuses).length) fail(`${id}: 星神必須提供本輪加成`);
+    for (const amount of Object.values(bonuses)) { number(amount, `${id}.bonuses`); if (amount > 1) fail(`${id}: 工作加成不得超過 100%`); }
+  }
   for (const [id, cost] of Object.entries(value.spawnCosts)) { keys(cost, resources, `${id}.spawnCost`); for (const amount of Object.values(cost)) number(amount, `${id}.spawnCost`); }
   const definitions = { ...value.buildings, ...value.technologies };
   for (const id of buildingIds) {
@@ -66,7 +84,7 @@ function validateRuntime(value) {
     visiting.delete(id); complete.add(id);
   }
   Object.keys(definitions).forEach(visit);
-  for (const [key, pair] of Object.entries(value.texts)) if (!Array.isArray(pair) || pair.length !== 2 || pair.some(text => typeof text !== 'string' || !text.trim() || text.length > 2000)) fail(`${key}: 必須提供繁中與英文公開文案`);
+  for (const [key, pair] of Object.entries(value.texts)) if (!Array.isArray(pair) || pair.length !== 3 || pair.some(text => typeof text !== 'string' || !text.trim() || text.length > 2000)) fail(`${key}: 必須提供繁中、英文與日文公開文案`);
   return value;
 }
 module.exports = { buildingIds, technologyIds, civilizationIds, catalogGroups, labelKeys, validateRuntime };

@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import { computed, ref, watchEffect } from 'vue';
-import { faGear } from '@fortawesome/free-solid-svg-icons';
-import type { Branch } from '../core/content';
+import { computed, onUnmounted, ref, watch, watchEffect } from 'vue';
+import { cloud as faCloud, gear as faGear, leaf as faLeaf, sun as faSun } from './icons';
+import type { Branch, StarGod } from '../core/content';
 import { resources } from '../core/content';
 import { flow, has, reward } from '../core/game';
 import type { Command } from '../core/game';
-import { environment } from '../core/world';
+import { environment, nativeCivilization } from '../core/world';
 import { translate } from '../i18n';
 import type { GameSession } from '../session';
 import { version } from '../../package.json';
@@ -14,6 +14,8 @@ import type { Tab } from './projection';
 import { formatNumber } from './model';
 import { useSession } from './composables/useSession';
 import GameIcon from './atoms/GameIcon.vue';
+import StarGodIcon from './atoms/StarGodIcon.vue';
+import InfoTip from './atoms/InfoTip.vue';
 import TabBar from './molecules/TabBar.vue';
 import ModalDialog from './molecules/ModalDialog.vue';
 import GameLayout from './templates/GameLayout.vue';
@@ -28,6 +30,7 @@ import SciencePanel from './features/SciencePanel.vue';
 import RecordsPanel from './features/RecordsPanel.vue';
 import AchievementsPanel from './features/AchievementsPanel.vue';
 import LegacyPanel from './features/LegacyPanel.vue';
+import StarGodsPanel from './features/StarGodsPanel.vue';
 const props = defineProps<{ session: GameSession; }>();
 const snap = useSession(props.session);
 const state = computed(() => snap.value.state);
@@ -37,26 +40,37 @@ const fmt = (value: number, decimals = 0) => formatNumber(preferences.value.lang
 const production = computed(() => flow(state.value));
 const view = computed(() => project(state.value, preferences.value.showCompleted));
 const env = computed(() => environment(state.value.world));
+const civilization = computed(() => nativeCivilization(state.value.world));
 const chosenTab = ref<Tab>('overview');
+const mainTab = ref('planet');
 const children = ref<Partial<Record<Tab, string>>>({});
-const tab = computed(() => view.value.tabs.includes(chosenTab.value) ? chosenTab.value : 'overview');
+const tab = computed<Tab>(() => mainTab.value === 'planet' ? view.value.tabs.includes(chosenTab.value) ? chosenTab.value : 'overview' : mainTab.value as Tab);
 const child = computed(() => children.value[tab.value] ?? childTabs[tab.value][0]);
 const settingsOpen = ref(false);
-const confirm = ref<{ kind: 'reset' | 'abandon' | 'import'; start: Branch; text: string; } | null>(null);
+const aboutOpen = ref(false);
+const confirm = ref<{ kind: 'reset' | 'abandon' | 'import' | 'starGod'; start: Branch; text: string; starGod?: StarGod; } | null>(null);
 const send = (cmd: Command): void => props.session.dispatch(cmd);
 const panelProps = computed(() => ({ state: state.value, t, send, view: view.value }));
 const featureProps = computed(() => ({
   ...panelProps.value,
-  ...(['overview', 'science', 'records', 'achievements'].includes(tab.value) ? { child: child.value } : {}),
+  ...(['science', 'achievements'].includes(tab.value) ? { child: child.value } : {}),
   ...(tab.value === 'buildings' ? { showCompleted: preferences.value.showCompleted } : {}),
+  ...(tab.value === 'achievements' ? { language: preferences.value.language } : {}),
 }));
 const featureEvents = computed(() => tab.value === 'buildings'
   ? { toggle: () => props.session.setPreferences({ showCompleted: !preferences.value.showCompleted }) }
-  : tab.value === 'legacy' ? { confirm: requestConfirm } : {});
-const pages = { overview: OverviewPanel, species: SpeciesPanel, workers: WorkersPanel, buildings: BuildingsPanel, science: SciencePanel, records: RecordsPanel, achievements: AchievementsPanel, legacy: LegacyPanel };
+  : tab.value === 'legacy' ? { confirm: requestConfirm } : tab.value === 'starGods' ? { select: (id: StarGod) => { confirm.value = { kind: 'starGod', start: 'base', text: '', starGod: id }; } } : {});
+const pages = { overview: OverviewPanel, species: SpeciesPanel, workers: WorkersPanel, buildings: BuildingsPanel, science: SciencePanel, starGods: StarGodsPanel, achievements: AchievementsPanel, legacy: LegacyPanel };
 const planetName = computed(() => t('planetDesignation', { n: state.value.world.seed.toString(16).toUpperCase() }));
 const disabled = computed(() => snap.value.readOnly || !snap.value.ready);
-watchEffect(() => { document.documentElement.lang = preferences.value.language; if (chosenTab.value !== tab.value) chosenTab.value = tab.value; });
+const systemColor = window.matchMedia('(prefers-color-scheme: dark)');
+const systemDark = ref(systemColor.matches);
+const colorChanged = (event: MediaQueryListEvent): void => { systemDark.value = event.matches; };
+systemColor.addEventListener('change', colorChanged);
+onUnmounted(() => systemColor.removeEventListener('change', colorChanged));
+watchEffect(() => { document.documentElement.lang = preferences.value.language; document.documentElement.dataset.theme = preferences.value.theme ?? 'sand'; document.documentElement.dataset.appearance = !preferences.value.appearance || preferences.value.appearance === 'system' ? systemDark.value ? 'dark' : 'light' : preferences.value.appearance; if (mainTab.value === 'planet' && chosenTab.value !== tab.value) chosenTab.value = tab.value; });
+watch([() => snap.value.ready, () => state.value.starGod], ([ready, god]) => { if (ready) mainTab.value = god ? 'planet' : 'starGods'; }, { immediate: true });
+const mainLabel = (id: string) => id === 'planet' ? planetName.value : t(id);
 function changeTab(value: string): void { props.session.activate(); chosenTab.value = value as Tab; }
 function changeChild(value: string): void { children.value = { ...children.value, [tab.value]: value }; }
 function requestConfirm(kind: 'reset' | 'abandon' | 'import', startOrText?: Branch | string): void {
@@ -66,6 +80,7 @@ function accept(): void {
   const current = confirm.value;
   if (!current) return;
   if (current.kind === 'import') void props.session.import(current.text);
+  else if (current.kind === 'starGod' && current.starGod) send({ type: 'starGod', id: current.starGod });
   else send({ type: 'reset', start: current.start, abandon: current.kind === 'abandon' });
   confirm.value = null;
 }
@@ -77,6 +92,7 @@ function accept(): void {
         <h1>Universe Idle</h1>
       </div>
       <div class="header-controls">
+        <InfoTip v-if="state.starGod" class="header-deity" :text="t('starGod' + state.starGod) + ': ' + t('starGod' + state.starGod + 'Desc')" tooltip><StarGodIcon :id="state.starGod" /></InfoTip>
         <span class="version" :aria-label="t('version')">v{{ version }}</span>
         <button
           class="settings-button"
@@ -89,6 +105,7 @@ function accept(): void {
         </button>
       </div>
     </header>
+    <TabBar class="tabs main-tabs" :items="view.mainTabs" :model-value="mainTab" :label="t('mainNavigation')" prefix="main-tab" controls="game-panel" :text="mainLabel" @update:model-value="mainTab = $event" />
     <p v-if="!snap.ready" role="status">{{ t('loading') }}</p>
     <div v-if="snap.notice" class="notice" role="status">
       <div>
@@ -96,7 +113,7 @@ function accept(): void {
       </div>
       <button :aria-label="t('dismiss')" @click="session.dismissNotice()">×</button>
     </div>
-    <section class="world-header" :aria-label="t('planetTitle')">
+    <section v-if="mainTab === 'planet'" class="world-header" :aria-label="t('planetTitle')">
       <div class="settlement-status">
         <strong>{{ planetName }}</strong>
         <span :class="snap.readOnly || preferences.paused ? 'amber' : 'teal'">{{ t(snap.readOnly ? 'inactiveTab' : preferences.paused ? 'paused' : 'online') }}</span>
@@ -104,33 +121,30 @@ function accept(): void {
       </div>
       <dl class="environment-strip">
         <div>
-          <dt>{{ t('season') }}</dt>
+          <dt><InfoTip :text="t('season')" :icon="faSun" /></dt>
           <dd>{{ t(env.season) }} / {{ t(env.daylight ? 'daylight' : 'night') }}</dd>
         </div>
         <div>
-          <dt>{{ t('weather') }}</dt>
+          <dt><InfoTip :text="t('weather')" :icon="faCloud" /></dt>
           <dd>{{ t(env.weather) }}</dd>
         </div>
         <div>
-          <dt>{{ t('magicWind') }}</dt>
-          <dd>{{ Math.round(env.magic * 100) }}%</dd>
-        </div>
-        <div>
-          <dt>{{ t('vitalityField') }}</dt>
-          <dd>{{ Math.round(env.vitality * 100) }}%</dd>
+          <dt><InfoTip :text="t('nativeIntelligence')" :icon="faLeaf" /></dt>
+          <dd>{{ t('native' + civilization.species.archetype) }}</dd>
         </div>
       </dl>
       <div class="acceleration-time">
         <span>{{ t('accelerationRemaining', { n: Math.ceil(snap.timeBank.seconds / 60) }) }}</span>
       </div>
     </section>
-    <GameLayout>
+    <GameLayout :planet="mainTab === 'planet'">
       <template #resources>
-        <ResourcesPanel v-bind="panelProps" :production="production" :fmt="fmt" />
+        <ResourcesPanel v-if="mainTab === 'planet'" v-bind="panelProps" :production="production" :fmt="fmt" />
       </template>
       <template #navigation>
         <TabBar
           class="tabs"
+          v-if="mainTab === 'planet'"
           :items="view.tabs"
           :model-value="tab"
           label="Universe Idle"
@@ -151,7 +165,7 @@ function accept(): void {
           @update:model-value="changeChild"
         />
       </template>
-      <div id="game-panel" role="tabpanel" :aria-labelledby="'tab-' + tab">
+      <div id="game-panel" role="tabpanel" :aria-labelledby="mainTab === 'planet' ? 'tab-' + tab : 'main-tab-' + mainTab">
         <div
           id="child-panel"
           :role="childTabs[tab].length > 1 ? 'tabpanel' : undefined"
@@ -164,9 +178,9 @@ function accept(): void {
       </div>
       <template #queue>
         <ConstructionPanel v-bind="panelProps" :disabled="disabled" :paused="preferences.paused" :production="production" />
+        <RecordsPanel v-bind="panelProps" child="journalTab" />
         <section v-if="resources.some(r => state.refund[r] > 0)" class="panel">
-          <h2>{{ t('refundTitle') }}</h2>
-          <p>{{ t('refundHelp') }}</p>
+          <div class="section-head"><h2>{{ t('refundTitle') }}</h2><InfoTip :text="t('refundHelp')" /></div>
           <template v-for="r in resources" :key="r">
             <p v-if="state.refund[r] > 0">{{ t(r) }} {{ fmt(state.refund[r], 2) }}</p>
           </template>
@@ -175,6 +189,14 @@ function accept(): void {
         <p v-if="has(state, 'workshop') && (!state.assignments.base.craft || production.plankProduction + 1e-8 < production.desiredPlanks)" class="amber">{{ t(!state.assignments.base.craft ? 'noCraftWorkers' : 'craftBlocked') }}</p>
       </template>
     </GameLayout>
+    <footer class="game-footer">
+      <button @click="aboutOpen = true">{{ t('about') }}</button>
+    </footer>
+    <ModalDialog v-if="aboutOpen" :title="t('about')" :close-label="t('dismiss')" title-id="about-title" @close="aboutOpen = false">
+      <h2>Universe Idle</h2>
+      <p>{{ t('originalArtwork') }}</p>
+      <a href="https://gaze9999.github.io/" target="_blank" rel="noreferrer">gaze9999</a>
+    </ModalDialog>
     <ModalDialog
       v-if="settingsOpen"
       class="settings-dialog"
@@ -187,12 +209,17 @@ function accept(): void {
     </ModalDialog>
     <ModalDialog
       v-if="confirm"
-      :title="t(confirm.kind === 'reset' ? 'resetConfirm' : confirm.kind === 'abandon' ? 'abandonConfirm' : 'importConfirm')"
+      :title="t(confirm.kind === 'reset' ? 'resetConfirm' : confirm.kind === 'abandon' ? 'abandonConfirm' : confirm.kind === 'starGod' ? 'starGodConfirm' : 'importConfirm')"
       :close-label="t('dismiss')"
       title-id="confirm-title"
       @close="confirm = null"
     >
-      <p>{{ confirm.kind === 'reset' ? t('availableReward') + ': ' + reward(state) + '. ' + t('resetHelp') : t(confirm.kind === 'abandon' ? 'abandonHelp' : 'importHelp') }}</p>
+      <template v-if="confirm.kind === 'starGod'">
+        <h2>{{ t('starGod' + confirm.starGod) }}</h2>
+        <p class="teal">{{ t('starGod' + confirm.starGod + 'Desc') }}</p>
+        <p>{{ t('starGodHelp') }}</p>
+      </template>
+      <p v-else>{{ confirm.kind === 'reset' ? t('availableReward') + ': ' + reward(state) + '. ' + t('resetHelp') : t(confirm.kind === 'abandon' ? 'abandonHelp' : 'importHelp') }}</p>
       <div class="button-row">
         <button @click="confirm = null">{{ t('dismiss') }}</button>
         <button class="primary" :disabled="disabled" @click="accept">{{ t('confirm') }}</button>

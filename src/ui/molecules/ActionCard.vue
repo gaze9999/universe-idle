@@ -5,7 +5,7 @@ defineProps<{ title: string; description?: string; badge?: string; badgeLabel?: 
   <section class="panel action-card" :class="{ done }">
     <div class="section-head">
       <h2>{{ title }}</h2>
-      <span v-if="badge" class="badge" :title="badgeLabel" :aria-label="badgeLabel">{{ badge }}</span>
+      <span v-if="badge" class="badge" :aria-label="badgeLabel">{{ badge }}</span>
     </div>
     <p v-if="description">{{ description }}</p>
     <div class="action-details">

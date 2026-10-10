@@ -1,18 +1,21 @@
-import { achievementIds, aptitude, branches, contentVersion, jobs, queueLimit, researchDefs, researchIds, resources, species, structures } from '../core/content';
+import { achievementIds, aptitude, branches, contentVersion, jobs, queueLimit, researchDefs, researchIds, resources, species, starGodIds, structures } from '../core/content';
 import type { Assignments, Branch, Job, Research, Resource, Structure, TaskId } from '../core/content';
 import { assigned, buildingUnlocked, capacity, checkAchievements, count, has, meets, ordered, populationCapacity, slots, taskDef } from '../core/game';
 import type { GameState } from '../core/game';
 import { initialWorld, universes } from '../core/world';
 import { bankLimit, defaultTimeBank } from '../core/time-bank';
 import type { TimeBank } from '../core/time-bank';
+import type { Language } from '../i18n';
 
 export const saveKey = 'universe-idle/save-v1';
 export const backupKey = 'universe-idle/backup-v1';
 export const migrationKey = 'universe-idle/pre-upgrade-v3';
 export const bankMigrationKey = 'universe-idle/pre-time-bank-v4';
-export interface Preferences { language: 'zh-TW' | 'en'; paused: boolean; showCompleted: boolean }
+export type Theme = 'sand' | 'wbui';
+export type Appearance = 'system' | 'light' | 'dark';
+export interface Preferences { language: Language; paused: boolean; showCompleted: boolean; theme?: Theme; appearance?: Appearance }
 export interface Save { format: 'universe-idle'; version: 4; lastAt: number; state: GameState; preferences: Preferences; timeBank: TimeBank }
-export const defaultPreferences: Preferences = { language: 'zh-TW', paused: false, showCompleted: false };
+export const defaultPreferences: Preferences = { language: 'zh-TW', paused: false, showCompleted: false, theme: 'sand', appearance: 'system' };
 const fail = (): never => { throw new Error('invalidSave'); };
 function record(value: unknown): Record<string, unknown> {
   return value !== null && typeof value === 'object' && !Array.isArray(value) ? value as Record<string, unknown> : fail();
@@ -44,8 +47,8 @@ function assignments(value: unknown): Assignments {
 }
 const structureIds = Object.keys(structures) as Structure[];
 const taskIds: TaskId[] = [...structureIds, 'recruit'];
-const logKeys = ['arrival', 'started', 'built', 'cancelled', 'evolved', 'researched', 'purchased', 'resetDone', 'spawned', 'achievementUnlocked', 'queued', 'queueRemoved'];
-const logItems = [...taskIds, ...branches, 'mineral', ...researchIds, 'tools', 'startChoice', 'templates', ...achievementIds.map(a => `achievement${a}`)];
+const logKeys = ['arrival', 'started', 'built', 'cancelled', 'evolved', 'researched', 'purchased', 'resetDone', 'spawned', 'achievementUnlocked', 'queued', 'queueRemoved', 'starGodChosen', 'starved'];
+const logItems = [...taskIds, ...branches, 'mineral', ...researchIds, 'tools', 'startChoice', 'templates', ...achievementIds.map(a => `achievement${a}`), ...starGodIds.map(id => 'starGod' + id)];
 
 /** 外部 JSON 逐欄驗證後建立白名單物件; 未知版本與不合法引用均拒絕, 不猜測或覆寫 */
 export function parseSave(text: string): Save {
@@ -79,17 +82,19 @@ export function parseSave(text: string): Save {
     population: { base: num(pop.base, previous ? 8 : Number.MAX_SAFE_INTEGER, true), mineral: num(pop.mineral, previous ? 4 : Number.MAX_SAFE_INTEGER, true) },
     assignments: assignments(data.assignments),
     branch: id<Branch>(data.branch, branches), buildings, research: ids<Research>(data.research, previous ? ['crafting', 'planning'] : researchIds),
+    starGod: data.starGod === undefined || data.starGod === null ? null : id(data.starGod, starGodIds),
     task: task && taskId ? { id: taskId, progress: num(task.progress, Number.MAX_VALUE), paused: bool(task.paused), ...(previous ? taskDef(taskId) : { cost: Object.fromEntries(Object.entries(taskCost!).map(([r, amount]) => [r, num(amount, Number.MAX_VALUE)])), work: num(task.work, Number.MAX_VALUE) }) } : null,
     queue, queuePaused: previous ? false : bool(data.queuePaused),
     elapsed: num(data.elapsed),
     world: world ? { seed: num(world.seed, 4294967295, true), generatorVersion: 1, universe: id(world.universe, universes), age: num(world.age) } : { ...initialWorld(), age: num(data.elapsed) },
     achievements: Object.fromEntries(achievementIds.filter(a => achievements[a] !== undefined).map(a => [a, previous ? (num(achievements[a]), null) : achievements[a] === null ? null : num(achievements[a], 1e15, true)])),
-    stats: { severeSeconds: stats ? num(stats.severeSeconds) : 0 },
+    stats: { severeSeconds: stats ? num(stats.severeSeconds) : 0, ...(stats?.starvationSeconds === undefined ? {} : { starvationSeconds: num(stats.starvationSeconds, 60) }) },
     legacy: { points: num(legacy.points, 1e9, true), resets: num(legacy.resets, 1e8, true), tools: num(legacy.tools, 5, true), startChoice: bool(legacy.startChoice), templates: bool(legacy.templates), discovered: ids(legacy.discovered, branches) },
     template: data.template === null ? null : assignments(data.template),
     log: logs.map(value => { const entry = record(value); return { at: num(entry.at), key: id(entry.key, logKeys), ...(entry.item === undefined ? {} : { item: id(entry.item, logItems) }) }; }),
   };
-  if (state.population.base < 6 || state.population.base > populationCapacity(state, 'base') || state.population.mineral > populationCapacity(state, 'mineral')) return fail();
+  if (state.population.base > populationCapacity(state, 'base') || state.population.mineral > populationCapacity(state, 'mineral')) return fail();
+  if (previous && state.population.base < 6) return fail();
   if (old && state.population.mineral !== populationCapacity(state, 'mineral')) return fail();
   if (state.world.age + 1e-7 < state.elapsed || state.stats.severeSeconds > state.world.age + 1e-7) return fail();
   if (previous && Object.values(achievements).some(at => num(at) > state.world.age)) return fail();
@@ -116,12 +121,12 @@ export function parseSave(text: string): Save {
     if (state.template && (species.some(sp => jobs.reduce((n, j) => n + state.template![sp][j], 0) > (sp === 'base' ? 8 : 4)) || jobs.some(j => state.template!.base[j] + state.template!.mineral[j] > (j === 'craft' ? 1 : j === 'research' ? 2 : 12)))) return fail();
     if (state.task && state.task.id !== 'recruit' && has(state, state.task.id)) return fail();
   }
-  const language = id(prefs.language, ['zh-TW', 'en'] as const);
+  const language = id(prefs.language, ['zh-TW', 'en', 'ja'] as const);
   if (previous) checkAchievements(state);
   const bank = raw.version === 4 ? record(raw.timeBank) : null;
   const timeBank = bank ? { seconds: num(bank.seconds, bankLimit), enabled: bool(bank.enabled) } : defaultTimeBank();
   timeBank.enabled = true;
-  return { format: 'universe-idle', version: 4, lastAt: num(raw.lastAt, 1e15, true), state, preferences: { language, paused: bool(prefs.paused), showCompleted: old ? false : bool(prefs.showCompleted) }, timeBank };
+  return { format: 'universe-idle', version: 4, lastAt: num(raw.lastAt, 1e15, true), state, preferences: { language, paused: bool(prefs.paused), showCompleted: old ? false : bool(prefs.showCompleted), theme: prefs.theme === undefined || prefs.theme === 'website' ? 'sand' : id(prefs.theme, ['sand', 'wbui'] as const), appearance: prefs.appearance === undefined ? 'system' : id(prefs.appearance, ['system', 'light', 'dark'] as const) }, timeBank };
 }
 export function encodeSave(state: GameState, preferences: Preferences, lastAt: number, timeBank = defaultTimeBank()): string {
   return JSON.stringify({ format: 'universe-idle', version: 4, lastAt, state, preferences, timeBank } satisfies Save);

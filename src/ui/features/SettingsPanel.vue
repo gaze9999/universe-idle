@@ -1,12 +1,14 @@
 <script setup lang="ts">
 import { ref } from 'vue';
+import { bolt as faBolt, signal as faWifi } from '../icons';
 import type { GameSession, Snapshot } from '../../session';
 import type { Language } from '../../i18n';
+import type { Appearance, Theme } from '../../platform/save';
 import type { Tr } from '../model';
 import TabBar from '../molecules/TabBar.vue';
+import InfoTip from '../atoms/InfoTip.vue';
 const props = defineProps<{ snap: Snapshot; session: GameSession; t: Tr; }>();
 const emit = defineEmits<{ confirm: [kind: 'import' | 'abandon', text?: string]; }>();
-const base = import.meta.env.BASE_URL;
 const tab = ref('gameSettings');
 const importText = ref('');
 async function download(raw = false, beforeUpgrade = false): Promise<void> {
@@ -24,7 +26,7 @@ function file(event: Event): void { const input = (event.target as HTMLInputElem
   <TabBar
     v-model="tab"
     class="subtabs settings-tabs"
-    :items="['gameSettings', 'saveTitle', 'import']"
+    :items="['gameSettings', 'saveTitle']"
     :label="t('settings')"
     prefix="settings-tab"
     controls="settings-panel"
@@ -33,15 +35,17 @@ function file(event: Event): void { const input = (event.target as HTMLInputElem
   <div id="settings-panel" role="tabpanel" :aria-labelledby="'settings-tab-' + tab">
     <fieldset :disabled="snap.readOnly || !snap.ready">
       <section v-if="tab === 'gameSettings'" class="panel">
+        <label>{{ t('theme') }}<select :value="snap.preferences.theme ?? 'sand'" @change="session.setPreferences({ theme: ($event.target as HTMLSelectElement).value as Theme })"><option value="sand">{{ t('themeSand') }}</option><option value="wbui">{{ t('themeWorkbench') }}</option></select></label>
+        <label>{{ t('appearance') }}<select :value="snap.preferences.appearance ?? 'system'" @change="session.setPreferences({ appearance: ($event.target as HTMLSelectElement).value as Appearance })"><option value="system">{{ t('systemAppearance') }}</option><option value="light">{{ t('lightAppearance') }}</option><option value="dark">{{ t('darkAppearance') }}</option></select></label>
         <div class="button-row">
-          <label>{{ t('language') }}<select :value="snap.preferences.language" @change="session.setPreferences({ language: ($event.target as HTMLSelectElement).value as Language })"><option value="zh-TW">繁體中文</option><option value="en">English</option></select></label>
+          <label>{{ t('language') }}<select :value="snap.preferences.language" @change="session.setPreferences({ language: ($event.target as HTMLSelectElement).value as Language })"><option value="zh-TW">繁體中文</option><option value="en">English</option><option value="ja">日本語</option></select></label>
           <button class="secondary" @click="session.setPreferences({ paused: !snap.preferences.paused })">{{ t(snap.preferences.paused ? 'resume' : 'pause') }}</button>
+          <InfoTip :text="t('bankHelp')" :icon="faBolt" tooltip />
+          <InfoTip :text="t('offlineHelp')" :icon="faWifi" tooltip />
         </div>
-        <p>{{ t('bankHelp') }}</p>
-        <p>{{ t('offlineHelp') }}</p>
       </section>
       <section v-if="tab === 'saveTitle'" class="panel">
-        <p>{{ t('savingHelp') }}</p>
+        <InfoTip :text="t('savingHelp')" />
         <p class="teal">{{ snap.savedAt ? t('saved') + ' ' + new Date(snap.savedAt).toLocaleTimeString(snap.preferences.language) : t('notSaved') }}</p>
         <div class="button-row">
           <button @click="session.save()">{{ t('save') }}</button>
@@ -50,8 +54,8 @@ function file(event: Event): void { const input = (event.target as HTMLInputElem
           <button :disabled="!session.preUpgradeSave()" @click="download(false, true)">{{ t('exportBeforeUpgrade') }}</button>
           <button @click="session.recoverBackup()">{{ t('recoverBackup') }}</button>
         </div>
-      </section>
-      <section v-if="tab === 'import'" class="panel">
+        <hr />
+        <h2>{{ t('import') }}</h2>
         <p>{{ t('importHelp') }}</p>
         <label>{{ t('jsonLabel') }}<textarea v-model="importText" maxlength="100000" rows="5" /></label>
         <input type="file" accept="text/plain,application/json,.txt,.json" :aria-label="t('import')" @change="file" />
@@ -64,5 +68,4 @@ function file(event: Event): void { const input = (event.target as HTMLInputElem
       </section>
     </fieldset>
   </div>
-  <small class="credits">{{ t('iconCredits') }}: <a href="https://fontawesome.com/" target="_blank" rel="noreferrer">Font Awesome Free</a> · <a :href="base + 'fontawesome-license.txt'" target="_blank" rel="noreferrer">CC BY 4.0 / MIT</a></small>
 </template>

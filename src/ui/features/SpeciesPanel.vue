@@ -4,13 +4,15 @@ import { has, populationCapacity, spawnReason } from '../../core/game';
 import { speciesAptitude, speciesTraits } from '../../core/world';
 import type { PanelProps } from '../model';
 import CostLine from '../molecules/CostLine.vue';
+import InfoTip from '../atoms/InfoTip.vue';
 defineProps<PanelProps>();
 </script>
 <template>
+  <h2>{{ t('planetSpecies') }}</h2>
   <section v-if="has(state, 'habitat') && state.branch === 'base'" class="panel">
     <div class="section-head">
       <h2>{{ t('branchTitle') }}</h2>
-      <small>{{ t('branchHelp') }}</small>
+      <InfoTip :text="t('branchHelp')" />
     </div>
     <div class="card-grid">
       <div v-for="id in (['forest', 'symbiosis'] as const)" :key="id" class="choice">

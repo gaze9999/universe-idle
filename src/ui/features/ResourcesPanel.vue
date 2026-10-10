@@ -10,7 +10,7 @@ defineProps<PanelProps & { production: ReturnType<typeof flow>; fmt: (value: num
     <section v-for="r in view.resources" :key="r" class="resource" :aria-label="t(r)">
       <div>
         <span>{{ t(r) }}</span>
-        <strong :title="String(state.resources[r])">{{ fmt(state.resources[r]) }}<span> / {{ fmt(capacity(state)) }}</span></strong>
+        <strong>{{ fmt(state.resources[r]) }}<span> / {{ fmt(capacity(state)) }}</span></strong>
       </div>
       <small>{{ production.displayRates[r] >= 0 ? '+' : '' }}{{ fmt(production.displayRates[r], 3) }} /s</small>
       <div class="resource-track">
@@ -18,5 +18,4 @@ defineProps<PanelProps & { production: ReturnType<typeof flow>; fmt: (value: num
       </div>
     </section>
   </div>
-  <p v-if="production.starving" class="amber">{{ t('starving') }}</p>
 </template>
