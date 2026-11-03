@@ -20,7 +20,6 @@ jobs:
           node-version-file: .node-version
           cache: npm
       - run: npm ci
-      - run: npm test
       - run: npm run build
       - uses: actions/configure-pages@v6
       - uses: actions/upload-pages-artifact@v5

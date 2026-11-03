@@ -15,6 +15,4 @@
 
 圖示與星神紋章採用原創單色 SVG
 
-## 公開內容檢查
-
-提交與推送前依 [公開內容檢查](docs/public-content.md) 設定 Git hooks, 執行暫存區與歷史檢查
+第一方內容採 [MIT 授權](LICENSE)

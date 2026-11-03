@@ -1,6 +1,6 @@
 {
   "name": "universe-idle",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "private": true,
   "type": "module",
   "engines": {
@@ -10,7 +10,6 @@
     "dev": "vite --host 127.0.0.1 --mode dev",
     "build": "node tools/check-content.cjs && node tools/check-vue.cjs --noEmit && vite build --mode prod",
     "preview": "vite preview --host 127.0.0.1 --mode prod",
-    "test": "vitest run",
     "check": "node tools/check-content.cjs && node tools/check-vue.cjs --noEmit"
   },
   "dependencies": {

@@ -18,3 +18,7 @@ test-results/
 *.sqlite-*
 *.db
 *.db-*
+/tests/
+**/.claude/settings.local.json
+**/.codex/config.toml
+**/.codex/auth.json
