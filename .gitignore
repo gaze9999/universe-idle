@@ -22,3 +22,5 @@ test-results/
 **/.claude/settings.local.json
 **/.codex/config.toml
 **/.codex/auth.json
+CLAUDE.local.md
+**/.claude/worktrees/
