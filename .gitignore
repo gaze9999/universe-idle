@@ -24,3 +24,6 @@ test-results/
 **/.codex/auth.json
 CLAUDE.local.md
 **/.claude/worktrees/
+
+# Python maintenance cache
+tools/__pycache__/
